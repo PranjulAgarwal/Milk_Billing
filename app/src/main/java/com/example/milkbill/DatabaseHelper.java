@@ -16,6 +16,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public static final String COL2= "DATE";
     public static final String COL3= "QUANTITY";
     public static final String COL4= "BILL";
+    public static final String COL5= "PAYMENT";
 
     public DatabaseHelper(@Nullable Context context) {
         super(context, DATABASE_NAME, null, 1);
@@ -23,7 +24,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase sqLiteDatabase) {
-        sqLiteDatabase.execSQL("create table " + TABLE_NAME + " (ID INTEGER PRIMARY KEY AUTOINCREMENT, DATE TEXT, QUANTITY TEXT, BILL INTEGER) ");
+        sqLiteDatabase.execSQL("create table " + TABLE_NAME + " (ID INTEGER PRIMARY KEY AUTOINCREMENT, DATE TEXT, QUANTITY TEXT, BILL INTEGER, PAYMENT TEXT) ");
     }
 
     @Override
@@ -32,12 +33,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         onCreate(sqLiteDatabase);
     }
 
-    public boolean insertData(String DATE, String QUANTITY, String BILL){
+    public boolean insertData(String DATE, String QUANTITY, String BILL, String PAYMENT){
         SQLiteDatabase sqLiteDatabase = this.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
         contentValues.put(COL2, DATE);
         contentValues.put(COL3, QUANTITY);
         contentValues.put(COL4, BILL);
+        contentValues.put(COL5, PAYMENT);
         long result = sqLiteDatabase.insert(TABLE_NAME,null,contentValues);
         if(result==-1)
             return false;
@@ -49,6 +51,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         SQLiteDatabase sqLiteDatabase = this.getWritableDatabase();
         Cursor res = sqLiteDatabase.rawQuery("select * from "+TABLE_NAME,null);
         return res;
+    }
+
+    public void deleteData(){
+        SQLiteDatabase sqLiteDatabase = this.getWritableDatabase();
+        sqLiteDatabase.execSQL("delete from "+ TABLE_NAME);
     }
 
 }

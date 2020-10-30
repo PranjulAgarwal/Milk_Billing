@@ -4,31 +4,23 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Context;
-import android.content.Intent;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.View;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ListAdapter;
-import android.widget.ListView;
-import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import java.text.DateFormat;
 import java.text.DecimalFormat;
-import java.util.ArrayList;
 import java.util.Calendar;
 
 public class MainActivity extends AppCompatActivity{
 
     DatabaseHelper myDB;
-    Button cal,hist;
+    Button cal,hist,delete;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -48,6 +40,8 @@ public class MainActivity extends AppCompatActivity{
             res.moveToLast();
             vBill.setText(res.getString(3));
         }
+
+
 
 
         cal = (Button) findViewById(R.id.calculate);
@@ -73,6 +67,7 @@ public class MainActivity extends AppCompatActivity{
                 if(TextUtils.isEmpty(vPay.getText().toString()))
                 {
                     cPay=0;
+                    vPay.setText("0");
                 }
 
                 else
@@ -82,7 +77,7 @@ public class MainActivity extends AppCompatActivity{
                 DecimalFormat formatVal = new DecimalFormat("##.##");
                 vBill.setText(formatVal.format(cBill));
 
-                boolean isInserted = myDB.insertData(vDate.getText().toString(),vQuantity.getText().toString(),vBill.getText().toString());
+                boolean isInserted = myDB.insertData(vDate.getText().toString(),vQuantity.getText().toString(),vBill.getText().toString(),vPay.getText().toString());
                 if(isInserted)
                     Toast.makeText(MainActivity.this,"Data Inserted",Toast.LENGTH_LONG).show();
                 else
@@ -101,11 +96,23 @@ public class MainActivity extends AppCompatActivity{
                }
                StringBuffer buffer = new StringBuffer();
                 while (res.moveToNext()){
-                    buffer.append("ID : "+res.getString(0)+"\n Date : "+res.getString(1)+"\n Quantity = "+res.getString(2)+"kg \n Bill =  "+res.getString(3)+"\n\n");
+                    buffer.append("ID : "+res.getString(0)+"\n Date : "+res.getString(1)+"\n Quantity = "+res.getString(2)+"kg \n Bill =  "+res.getString(3)+"\n Paid =  "+res.getString(4)+"\n\n");
                 }
                 showMessage("Data",buffer.toString());
             }
         });
+
+        delete = (Button) findViewById(R.id.reset2);
+        delete.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                myDB.deleteData();
+                vBill.setText("0");
+                Toast.makeText(MainActivity.this, "ALL DATA ERASED",Toast.LENGTH_LONG).show();
+                return;
+            }
+        });
+
     }
 
     public void showMessage(String title, String Message){
