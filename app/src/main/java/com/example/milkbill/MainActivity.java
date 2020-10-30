@@ -1,45 +1,59 @@
 package com.example.milkbill;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Context;
+import android.content.Intent;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ListAdapter;
+import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import java.text.DateFormat;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 
 public class MainActivity extends AppCompatActivity{
 
-    Spinner spinner;
-    Button cal;
+    DatabaseHelper myDB;
+    Button cal,hist;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        myDB = new DatabaseHelper(this);
+
         Calendar calendar = Calendar.getInstance();
         String currentDate = DateFormat.getDateInstance().format(calendar.getTime());
         EditText vDate = (EditText) findViewById(R.id.editTextDate);
         vDate.setText(currentDate);
-
+        TextView vBill = (TextView) findViewById(R.id.textBill);
+        EditText vPay = (EditText) findViewById(R.id.editTextPayment);
+        EditText vQuantity = (EditText) findViewById(R.id.editQuantity);
+        Cursor res =  myDB.getAllData();
+        if(res.getCount()!=0) {
+            res.moveToLast();
+            vBill.setText(res.getString(3));
+        }
 
 
         cal = (Button) findViewById(R.id.calculate);
         cal.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                TextView vBill = (TextView) findViewById(R.id.textBill);
-                EditText vPay = (EditText) findViewById(R.id.editTextPayment);
-                EditText vQuantity = (EditText) findViewById(R.id.editQuantity);
 
                 if(TextUtils.isEmpty(vQuantity.getText().toString()))
                 {
@@ -67,7 +81,39 @@ public class MainActivity extends AppCompatActivity{
                 cBill+=quantities*50-cPay;
                 DecimalFormat formatVal = new DecimalFormat("##.##");
                 vBill.setText(formatVal.format(cBill));
+
+                boolean isInserted = myDB.insertData(vDate.getText().toString(),vQuantity.getText().toString(),vBill.getText().toString());
+                if(isInserted)
+                    Toast.makeText(MainActivity.this,"Data Inserted",Toast.LENGTH_LONG).show();
+                else
+                    Toast.makeText(MainActivity.this,"Data is NOT Inserted",Toast.LENGTH_LONG).show();
+            }
+        });
+
+        hist = (Button) findViewById(R.id.history);
+        hist.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+               Cursor res =  myDB.getAllData();
+               if(res.getCount()==0){
+                   Toast.makeText(MainActivity.this,"NO DATA",Toast.LENGTH_LONG).show();
+                   return;
+               }
+               StringBuffer buffer = new StringBuffer();
+                while (res.moveToNext()){
+                    buffer.append("ID : "+res.getString(0)+"\n Date : "+res.getString(1)+"\n Quantity = "+res.getString(2)+"kg \n Bill =  "+res.getString(3)+"\n\n");
+                }
+                showMessage("Data",buffer.toString());
             }
         });
     }
+
+    public void showMessage(String title, String Message){
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setCancelable(true);
+        builder.setTitle(title);
+        builder.setMessage(Message);
+        builder.show();
+    }
+
 }
