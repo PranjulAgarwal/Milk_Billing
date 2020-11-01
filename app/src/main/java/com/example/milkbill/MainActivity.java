@@ -102,7 +102,7 @@ public class MainActivity extends AppCompatActivity{
             }
         });
 
-        delete = (Button) findViewById(R.id.reset2);
+        delete = (Button) findViewById(R.id.reset);
         delete.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
